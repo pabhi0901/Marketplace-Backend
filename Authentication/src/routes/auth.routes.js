@@ -2,7 +2,7 @@ import express from "express"
 const router = express.Router()
 
 //controllers
-import {registerController,loginController,logoutController,userDetails, addUserAddress,getUserAddresses, deleteUserAddress} from "../controller/auth.controller.js"
+import {registerController,loginController,userDetails, addUserAddress,getUserAddresses, deleteUserAddress} from "../controller/auth.controller.js"
 
 //middlewares
 import authMiddleware from "../middleware/auth.middleware.js"
@@ -13,7 +13,7 @@ import {registerUserValidations,loginUserValidation, addressValidator} from "../
 //routes
 router.post("/register",registerUserValidations,registerController)
 router.post("/login",loginUserValidation,loginController)
-router.get("/logout",logoutController)
+// router.get("/logout",logoutController)
 
 // this route returns the data of the user whenever it is asked
 router.get("/getUserDetails",authMiddleware,userDetails)

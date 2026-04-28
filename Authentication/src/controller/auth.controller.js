@@ -1,11 +1,11 @@
 import userModel from './../models/user.model.js';
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken"
-import redis from "../db/redis.js"
+// import redis from "../db/redis.js"
 
 const registerController = async function(req,res){
     
-    const {username,email,password,fullname:{firstName,lastName}} = req.body;
+    const {username,email,password,fullname:{firstName,lastName},role="user"} = req.body;
 
     const userAlreadyExist = await userModel.findOne({
         $or: //$or will search in mongodb for user existing with having either username or email or both
@@ -25,6 +25,7 @@ const registerController = async function(req,res){
         username,
         password:hashPassword,
         email,
+        role,
         fullname:{
             firstName,
             lastName
@@ -33,6 +34,7 @@ const registerController = async function(req,res){
 
     const token = jwt.sign({
         userId:user._id,
+        username:user.username,
         name:user.name,
         email:user.email,
         role:user.role
@@ -79,6 +81,7 @@ const loginController = async function(req,res){
     const token = jwt.sign({
         userId:user._id,
         username:user.username,
+        name:user.name,
         email:user.email,
         role:user.role
     },process.env.JWT_SECRET,{expiresIn:'1d'})
@@ -112,22 +115,22 @@ const userDetails = async function(req,res){
     })
 }
 
-const logoutController = async function(req,res){
-    const token = req.cookies.token
-    if(token){
-        await redis.set(`blacklist:${token}`,'true','EX',24*60*60);//delete it from database in 1 day because it will be invalid anyway after one day
-    }
+// const logoutController = async function(req,res){
+//     const token = req.cookies.token
+//     if(token){
+//         await redis.set(`blacklist:${token}`,'true','EX',24*60*60);//delete it from database in 1 day because it will be invalid anyway after one day
+//     }
 
-    res.clearCookie('token',{
-        httpOnly:true,
-        secure:true
-    })
-        console.log("User logged out from backend");
+//     res.clearCookie('token',{
+//         httpOnly:true,
+//         secure:true
+//     })
+//         console.log("User logged out from backend");
         
-    return res.status(200).json({
-        "mess":"User logged out Successfully"
-    })
-}
+//     return res.status(200).json({
+//         "mess":"User logged out Successfully"
+//     })
+// }
 
 const getUserAddresses = async function(req,res){
 
@@ -199,4 +202,4 @@ const deleteUserAddress = async function (req,res){
 
 
 
-export {registerController,loginController,userDetails,logoutController,addUserAddress,getUserAddresses,deleteUserAddress}
+export {registerController,loginController,userDetails,addUserAddress,getUserAddresses,deleteUserAddress}
